@@ -14,32 +14,38 @@ void run(Map params = [:], ArrayList<String> phases) {
 // Run maven command with installed maven version
 void run(ArrayList<String> phases, ArrayList<String> goals, Map<String, String> properties, ArrayList<String> profiles) {
     stage("Maven") {
-        withMaven(maven: config.mavenId) {
-            String command = "mvn "
-            if (!phases) {
-                error "Must supply phase for Maven"
-            }
-            phases.each { phase -> command += "${phase} "}
-
-            if (goals) {
-                goals.each { goal -> command += "${goal} " }
-            }
-
-            if (properties) {
-                properties.each { propertyName, value -> command += "-D${propertyName} "
-                    if (value != null) {
-                        command += "= ${value} "
+        login_to_registry {
+            docker.image("${config.maven_image}:${config.maven_image_tag}").inside {
+                unstash "workspace"
+                withMaven(maven: config.mavenId) {
+                    String command = "mvn "
+                    if (!phases) {
+                        error "Must supply phase for Maven"
                     }
+                    phases.each { phase -> command += "${phase} "}
+
+                    if (goals) {
+                        goals.each { goal -> command += "${goal} " }
+                    }
+
+                    if (properties) {
+                        properties.each { propertyName, value -> command += "-D${propertyName} "
+                            if (value != null) {
+                                command += "= ${value} "
+                            }
+                        }
+                    }
+
+                    if (profiles) {
+                        command += "-P"
+                        String joined = profiles.join(",")
+                        command += joined
+                    }
+
+                    sh command
+                    archiveArtifacts('target/*.jar')
                 }
             }
-
-            if (profiles) {
-                command += "-P"
-                String joined = profiles.join(",")
-                command += joined
-            }
-
-            sh command
         }
     }
 }
