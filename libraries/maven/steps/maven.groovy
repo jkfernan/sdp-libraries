@@ -17,34 +17,32 @@ void run(ArrayList<String> phases, ArrayList<String> goals, Map<String, String> 
         login_to_registry {
             docker.image("${config.maven_image}:${config.maven_image_tag}").inside {
                 unstash "workspace"
-                withMaven(maven: config.mavenId) {
-                    String command = "mvn "
-                    if (!phases) {
-                        error "Must supply phase for Maven"
-                    }
-                    phases.each { phase -> command += "${phase} "}
+                String command = "mvn "
+                if (!phases) {
+                    error "Must supply phase for Maven"
+                }
+                phases.each { phase -> command += "${phase} "}
 
-                    if (goals) {
-                        goals.each { goal -> command += "${goal} " }
-                    }
+                if (goals) {
+                    goals.each { goal -> command += "${goal} " }
+                }
 
-                    if (properties) {
-                        properties.each { propertyName, value -> command += "-D${propertyName} "
-                            if (value != null) {
-                                command += "= ${value} "
-                            }
+                if (properties) {
+                    properties.each { propertyName, value -> command += "-D${propertyName} "
+                        if (value != null) {
+                            command += "= ${value} "
                         }
                     }
-
-                    if (profiles) {
-                        command += "-P"
-                        String joined = profiles.join(",")
-                        command += joined
-                    }
-
-                    sh command
-                    archiveArtifacts('target/*.jar')
                 }
+
+                if (profiles) {
+                    command += "-P"
+                    String joined = profiles.join(",")
+                    command += joined
+                }
+
+                sh command
+                archiveArtifacts('target/*.jar')
             }
         }
     }
