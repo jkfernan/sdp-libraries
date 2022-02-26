@@ -5,9 +5,9 @@ void call(){
 }
 
 void run(Map params = [:], ArrayList<String> phases) {
-    if (!config.mavenId) {
-        error "Must supply the installed Maven version's ID"
-    }
+    // if (!config.mavenId) {
+    //     error "Must supply the installed Maven version's ID"
+    // }
     this.run(phases, params.get('goals', []) as ArrayList<String>, params.get('properties', [:]) as Map<String, String>, params.get('profiles', []) as ArrayList<String>)
 }
 
