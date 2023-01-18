@@ -12,3 +12,9 @@ target/
 
 # Local Netlify folder
 .netlify
+
+# .DS_Store
+.DS_Store
+
+# .Jenv file
+.java-version
